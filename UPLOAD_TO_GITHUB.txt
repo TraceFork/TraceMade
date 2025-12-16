@@ -1,0 +1,61 @@
+# ========================================
+# TraceFork → GitHub Upload Commands
+# ========================================
+# 
+# IMPORTANT: Close this PowerShell window and open a NEW one first!
+# (Git needs a fresh terminal to work)
+#
+# Then run these commands in order:
+# ========================================
+
+# Step 1: Navigate to TraceFork folder
+cd g:\TraceFork
+
+# Step 2: Configure Git (one-time setup)
+git config --global user.name "Your Name Here"
+git config --global user.email "your.email@example.com"
+
+# Step 3: Verify Git is working
+git --version
+
+# Step 4: Initialize repository
+git init
+
+# Step 5: Add all files
+git add .
+
+# Step 6: Create initial commit
+git commit -m "Initial commit: TraceFork v1.0.0 - Cinematic Intelligence System"
+
+# Step 7: Create branch named 'main'
+git branch -M main
+
+# ========================================
+# NOW GO TO GITHUB:
+# ========================================
+# 1. Visit: https://github.com/new
+# 2. Repository name: TraceFork
+# 3. Description: A cinematic, experimental, intelligence-driven digital organism
+# 4. Public or Private: Your choice
+# 5. DO NOT check any boxes (README, .gitignore, license)
+# 6. Click "Create repository"
+# ========================================
+
+# Step 8: Add GitHub remote (REPLACE YOUR_USERNAME with your actual GitHub username)
+git remote add origin https://github.com/YOUR_USERNAME/TraceFork.git
+
+# Step 9: Push to GitHub
+git push -u origin main
+
+# ========================================
+# When prompted for credentials:
+# ========================================
+# Username: Your GitHub username
+# Password: Use a Personal Access Token (NOT your password)
+#   Create token at: https://github.com/settings/tokens
+#   Required scopes: "repo"
+# ========================================
+
+# That's it! Your repository will be live at:
+# https://github.com/YOUR_USERNAME/TraceFork
+# ========================================
