@@ -5,8 +5,8 @@
   "type": "module",
   "description": "TraceFork - Cinematic Intelligence System | Built by ForkTrace — 2024",
   "engines": {
-    "node": ">=18.0.0 <19.0.0",
-    "npm": ">=9.0.0"
+    "node": "24.x",
+    "npm": "10.x"
   },
   "scripts": {
     "dev": "vite",
