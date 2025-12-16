@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import { useIntelligence } from './IntelligenceContext';
 import { useBehavior } from './BehaviorContext';
 
@@ -39,7 +39,7 @@ const MODE_CONFIGS = {
             rotation: [0, 0, 0]
         },
         particles: {
-            count: 5000,
+            count: 1000,
             size: 1.5,
             speed: 0.5,
             spread: 10
@@ -71,7 +71,7 @@ const MODE_CONFIGS = {
             rotation: [0, 0, 0]
         },
         particles: {
-            count: 2000,
+            count: 500,
             size: 1.0,
             speed: 0.2,
             spread: 5
@@ -103,7 +103,7 @@ const MODE_CONFIGS = {
             rotation: [0, 0, 0]
         },
         particles: {
-            count: 7000,
+            count: 1500,
             size: 2.0,
             speed: 0.7,
             spread: 15
@@ -135,7 +135,7 @@ const MODE_CONFIGS = {
             rotation: [0, 0, 0]
         },
         particles: {
-            count: 4000,
+            count: 800,
             size: 1.2,
             speed: 0.3,
             spread: 8
@@ -185,17 +185,9 @@ export const ModeProvider = ({ children }) => {
         }
     }, [engagement, intentClarity]);
 
-    useEffect(() => {
-        const suggestionInterval = setInterval(() => {
-            const suggested = suggestMode();
-            if (suggested !== currentMode && Math.random() > 0.95) {
-            }
-        }, 5000);
+    // Removed suggestion interval - it was running every 5s doing nothing useful
 
-        return () => clearInterval(suggestionInterval);
-    }, [suggestMode, currentMode]);
-
-    const value = {
+    const value = useMemo(() => ({
         currentMode,
         isTransitioning,
         modeHistory,
@@ -203,7 +195,7 @@ export const ModeProvider = ({ children }) => {
         getModeConfig,
         suggestMode,
         MODE_CONFIGS
-    };
+    }), [currentMode, isTransitioning, modeHistory, switchMode, getModeConfig, suggestMode]);
 
     return (
         <ModeContext.Provider value={value}>

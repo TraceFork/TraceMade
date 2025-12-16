@@ -1,10 +1,10 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, memo, useCallback } from 'react';
 import { useMode } from '../context/ModeContext';
 import { useBehavior } from '../context/BehaviorContext';
 import { useIntelligence } from '../context/IntelligenceContext';
 import gsap from 'gsap';
 
-const ChromeLiquidUI = () => {
+const ChromeLiquidUI = memo(() => {
     const topPanelRef = useRef(null);
     const leftPanelRef = useRef(null);
     const { currentMode, switchMode, getModeConfig } = useMode();
@@ -26,11 +26,11 @@ const ChromeLiquidUI = () => {
         });
     }, [currentMode, config]);
 
-    const handleModeClick = (e, mode) => {
+    const handleModeClick = useCallback((e, mode) => {
         e.preventDefault();
         trackClick(e.clientX, e.clientY, e.target);
         switchMode(mode);
-    };
+    }, [switchMode, trackClick]);
 
     return (
         <div className="chrome-liquid-ui">
@@ -96,9 +96,11 @@ const ChromeLiquidUI = () => {
             </div>
         </div>
     );
-};
+});
 
-const SystemStateSection = () => {
+ChromeLiquidUI.displayName = 'ChromeLiquidUI';
+
+const SystemStateSection = memo(() => {
     const { cognitiveState } = useIntelligence();
 
     return (
@@ -130,9 +132,11 @@ const SystemStateSection = () => {
             </div>
         </div>
     );
-};
+});
 
-const BehaviorSignalsSection = () => {
+SystemStateSection.displayName = 'SystemStateSection';
+
+const BehaviorSignalsSection = memo(() => {
     const { intentClarity, exploration, rhythm } = useBehavior();
 
     return (
@@ -160,6 +164,8 @@ const BehaviorSignalsSection = () => {
             </div>
         </div>
     );
-};
+});
+
+BehaviorSignalsSection.displayName = 'BehaviorSignalsSection';
 
 export default ChromeLiquidUI;

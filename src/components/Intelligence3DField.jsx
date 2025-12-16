@@ -1,6 +1,5 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, memo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { useMode } from '../context/ModeContext';
 import { useIntelligence } from '../context/IntelligenceContext';
 import { useBehavior } from '../context/BehaviorContext';
@@ -45,8 +44,14 @@ const ParticleField = () => {
         return { positions, colors, sizes, velocities };
     }, [particleCount, config]);
 
+    const frameCountRef = useRef(0);
+
     useFrame((state, delta) => {
         if (!meshRef.current) return;
+
+        // Frame skipping: only update every other frame for better performance
+        frameCountRef.current++;
+        if (frameCountRef.current % 2 !== 0) return;
 
         const positions = meshRef.current.geometry.attributes.position.array;
         const velocities = particles.velocities;
@@ -136,39 +141,55 @@ const NeuralMesh = () => {
 
     return (
         <mesh ref={meshRef} material={shaderMaterial}>
-            <icosahedronGeometry args={[2, 4]} />
+            <icosahedronGeometry args={[2, 1]} />
         </mesh>
     );
 };
 
 const CameraController = () => {
     const { camera } = useThree();
-    const { getModeConfig } = useMode();
+    const { getModeConfig, currentMode } = useMode();
     const { gazePattern } = useBehavior();
+    const lastModeRef = useRef(currentMode);
 
     useFrame(() => {
-        const config = getModeConfig();
-        const targetPosition = new THREE.Vector3(...config.camera.position);
+        // Only update camera on mode change or significant gaze movement
+        if (lastModeRef.current !== currentMode) {
+            const config = getModeConfig();
+            const targetPosition = new THREE.Vector3(...config.camera.position);
+            camera.position.lerp(targetPosition, 0.1);
+            camera.fov = THREE.MathUtils.lerp(camera.fov, config.camera.fov, 0.1);
+            camera.updateProjectionMatrix();
+            lastModeRef.current = currentMode;
+        }
 
-        camera.position.lerp(targetPosition, 0.05);
-        camera.fov = THREE.MathUtils.lerp(camera.fov, config.camera.fov, 0.05);
-        camera.updateProjectionMatrix();
-
-        const offsetX = (gazePattern.x / window.innerWidth - 0.5) * 0.5;
-        const offsetY = (gazePattern.y / window.innerHeight - 0.5) * 0.5;
-        camera.position.x += offsetX * gazePattern.intensity * 0.1;
-        camera.position.y -= offsetY * gazePattern.intensity * 0.1;
+        // Only apply gaze offset if intensity is significant
+        if (gazePattern.intensity > 0.1) {
+            const offsetX = (gazePattern.x / window.innerWidth - 0.5) * 0.3;
+            const offsetY = (gazePattern.y / window.innerHeight - 0.5) * 0.3;
+            camera.position.x += offsetX * gazePattern.intensity * 0.05;
+            camera.position.y -= offsetY * gazePattern.intensity * 0.05;
+        }
     });
 
     return null;
 };
 
-const Intelligence3DField = () => {
+const Intelligence3DField = memo(() => {
     const { visualState } = useIntelligence();
 
     return (
         <div className="intelligence-3d-space">
-            <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+            <Canvas
+                frameloop="demand"
+                dpr={[1, 1.5]}
+                gl={{
+                    antialias: false,
+                    powerPreference: "high-performance",
+                    alpha: false
+                }}
+                camera={{ position: [0, 0, 5], fov: 75 }}
+            >
                 <color attach="background" args={['#000000']} />
                 <fog attach="fog" args={['#000000', 5, 15]} />
 
@@ -179,21 +200,11 @@ const Intelligence3DField = () => {
                 <ParticleField />
                 <NeuralMesh />
                 <CameraController />
-
-                <EffectComposer>
-                    <Bloom
-                        intensity={visualState.bloom}
-                        luminanceThreshold={0.2}
-                        luminanceSmoothing={0.9}
-                    />
-                    <Vignette
-                        offset={visualState.vignette}
-                        darkness={0.5}
-                    />
-                </EffectComposer>
             </Canvas>
         </div>
     );
-};
+});
+
+Intelligence3DField.displayName = 'Intelligence3DField';
 
 export default Intelligence3DField;

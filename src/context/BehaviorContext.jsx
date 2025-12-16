@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 const BehaviorContext = createContext(null);
 
@@ -104,8 +104,9 @@ export const BehaviorProvider = ({ children }) => {
     }, [intentClarity, exploration, rhythm, hesitation]);
 
     useEffect(() => {
-        const hesitationInterval = setInterval(analyzeHesitation, 500);
-        const engagementInterval = setInterval(calculateEngagement, 1000);
+        // Drastically reduced interval frequency for better performance
+        const hesitationInterval = setInterval(analyzeHesitation, 2000); // Was 500ms
+        const engagementInterval = setInterval(calculateEngagement, 3000); // Was 1000ms
 
         return () => {
             clearInterval(hesitationInterval);
@@ -113,7 +114,7 @@ export const BehaviorProvider = ({ children }) => {
         };
     }, [analyzeHesitation, calculateEngagement]);
 
-    const value = {
+    const value = useMemo(() => ({
         gazePattern,
         intentClarity,
         exploration,
@@ -128,7 +129,8 @@ export const BehaviorProvider = ({ children }) => {
         scrollHistory: scrollHistory.current,
         clickHistory: clickHistory.current,
         hoverHistory: hoverHistory.current
-    };
+    }), [gazePattern, intentClarity, exploration, rhythm, hesitation, engagement,
+        trackMouse, trackScroll, trackClick, trackHover]);
 
     return (
         <BehaviorContext.Provider value={value}>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 const IntelligenceContext = createContext(null);
 
@@ -55,7 +55,7 @@ export const IntelligenceProvider = ({ children }) => {
         setSystemMetrics(prev => ({ ...prev, ...metrics }));
     }, []);
 
-    const value = {
+    const value = useMemo(() => ({
         cognitiveState,
         visualState,
         narrativePhase,
@@ -64,7 +64,8 @@ export const IntelligenceProvider = ({ children }) => {
         updateVisualState,
         progressNarrative,
         updateMetrics
-    };
+    }), [cognitiveState, visualState, narrativePhase, systemMetrics,
+        updateCognitiveState, updateVisualState, progressNarrative, updateMetrics]);
 
     return (
         <IntelligenceContext.Provider value={value}>
